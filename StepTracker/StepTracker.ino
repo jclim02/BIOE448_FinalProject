@@ -9,6 +9,9 @@ BIOE 448 Final Project -- Step Counter
 */
 
 #include <Wire.h> // Necessary for I2C communication
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 int accel = 0x53; // I2C address for this sensor (from data sheet)
 float xavg, yavg, zavg; // reference values from boot
@@ -21,6 +24,8 @@ int step = 0; // step count
 
 void setup() {
   Serial.begin(9600);
+
+  // For accelerometer
   Wire.begin(); // Initialize serial communications
   Wire.beginTransmission(accel); // Start communicating with the device
   Wire.write(0x2D); // Enable measurement
@@ -36,6 +41,12 @@ void setup() {
   yavg = (Wire.read() | Wire.read() << 8); // Parse y values
   zavg = (Wire.read() | Wire.read() << 8); // Parse z values
   Wire.endTransmission();
+
+  // LCD display
+  lcd.begin(16, 2); //Initiate the LCD in a 16x2 configuration
+  lcd.print("BIOE 448");
+  lcd.setCursor(0, 1);
+  lcd.print("Step Counter");
 }
 
 void loop() {
