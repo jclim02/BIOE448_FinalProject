@@ -11,17 +11,13 @@ BIOE 448 Final Project -- Step Counter
 #include <Wire.h> // Necessary for I2C communication
 
 int accel = 0x53; // I2C address for this sensor (from data sheet)
+float xavg, yavg, zavg; // reference values from boot
 float x, y, z;
 float x2, y2, z2;
-float x3, y3, z3;
-float total_accel_1, total_accel_2, total_accel_3;
-float accel_diff, accel_diff_2;
-float diff = 20000;
-float xavg, yavg, zavg;
-bool base_1, base_2;
-// float diff_1, diff_2;
-int step = 0;
-int timeout = 0;
+float total_accel_1, total_accel_2;
+float accel_diff;
+float diff = 20000; // threshold difference
+int step = 0; // step count
 
 void setup() {
   Serial.begin(9600);
@@ -42,6 +38,7 @@ void setup() {
 }
 
 void loop() {
+  // obtain first set of values
   Wire.beginTransmission(accel);
   Wire.write(0x32); // Prepare to get readings for sensor (address from data sheet)
   Wire.endTransmission(false);
@@ -55,6 +52,7 @@ void loop() {
 
   delay(50);
 
+  // obtain second set of values
   Wire.beginTransmission(accel);
   Wire.write(0x32); // Prepare to get readings for sensor (address from data sheet)
   Wire.endTransmission(false);
@@ -68,7 +66,8 @@ void loop() {
 
   accel_diff = abs(total_accel_2 - total_accel_1);
 
-  if (accel_diff>diff){
+  // if the difference in values is greater than the threshold, count a step
+  if (accel_diff > diff){
     step++;
   }
 
