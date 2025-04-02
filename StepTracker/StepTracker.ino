@@ -27,6 +27,7 @@ void setup() {
   Wire.write(8); // Get sample measurement
   Wire.endTransmission();
 
+  // Reference accelerometer values on startup
   Wire.beginTransmission(accel);
   Wire.write(0x32); // Prepare to get readings for sensor (address from data sheet)
   Wire.endTransmission(false);
