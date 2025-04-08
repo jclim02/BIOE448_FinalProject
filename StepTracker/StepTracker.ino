@@ -10,13 +10,21 @@ BIOE 448 Final Project -- Step Counter
 
 #include <Wire.h> // Necessary for I2C communication
 #include <LiquidCrystal.h>
+#include "thingProperties.h"
 
+// LCD
 LiquidCrystal lcd(10, 9, 5, 4, 3, 2);
 
+// Accelerometer
 int accel = 0x53; // I2C address for this sensor (from data sheet)
 float xavg, yavg, zavg; // reference values from boot
 float x, y, z;
 float x2, y2, z2;
+
+// IoT
+int counter = 0;
+
+// Variables
 float total_accel_1, total_accel_2;
 float accel_diff;
 float diff = 20000; // threshold difference
@@ -42,6 +50,19 @@ void setup() {
   yavg = (Wire.read() | Wire.read() << 8); // Parse y values
   zavg = (Wire.read() | Wire.read() << 8); // Parse z values
   Wire.endTransmission();
+
+  // IoT
+  delay(1500);
+  initProperties();
+  //Connect to cloud and get info/errors
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+  setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
+  //Wait for cloud connection
+  while (ArduinoCloud.connected() != 1) {
+      ArduinoCloud.update();
+      delay(500);
+  }
 }
 
 void loop() {
@@ -88,6 +109,14 @@ void loop() {
   lcd.print(distance);
   lcd.print("ft");
   Serial.println(distance);
+
+// IoT
+  counter++;
+  if (counter > 50){
+    ArduinoCloud.update();
+    Serial.println(step);
+    counter = 0;
+  }
 
   delay(100);
 
