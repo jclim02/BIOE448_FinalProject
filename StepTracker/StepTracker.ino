@@ -10,7 +10,7 @@ BIOE 448 Final Project -- Step Counter
 
 #include <Wire.h> // Necessary for I2C communication
 #include <LiquidCrystal.h> // LCD
-#include <ArduinoBLE.h>
+#include <ArduinoBLE.h> // BLE
 
 // LCD
 LiquidCrystal lcd(10, 9, 5, 4, 3, 2);
@@ -55,21 +55,22 @@ void setup() {
   Wire.endTransmission();
 
   // BLE
-  while(!Serial);
+  // for debugging
+  while(!Serial); 
   if (!BLE.begin()){
     Serial.println("Waiting for ArduinoBLE");
     while(1);
   }
-
+  // device setup
   BLE.setLocalName("StepTracker");
   BLE.setAdvertisedService(newService);
   newService.addCharacteristic(readChar);
   newService.addCharacteristic(writeChar);
   BLE.addService(newService);
-
+  // instantiate read/write values
   readChar.writeValue(0);
   writeChar.writeValue(0);
-
+  // advertise
   BLE.advertise();
   Serial.println("Bluetooth device active");
 }
@@ -134,7 +135,7 @@ void loop() {
         lcd.print("ft");
         Serial.println(distance);
 
-        // BLE
+        // BLE: to read from peripheral device
         readChar.writeValue(step);
         
         delay(100);
